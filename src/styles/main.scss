@@ -1,0 +1,17 @@
+@import './mixins.scss';
+
+body{
+    background-color: rgb(194, 194, 194);
+}
+
+.notes {
+    padding: calc(3.5rem + 1rem) 1rem 1rem 1rem;
+    @include dFlex();
+    flex-wrap: wrap;
+}
+
+.add-note-btn{
+    position: absolute;
+    bottom: 4rem;
+    right: 1.5rem;
+}
