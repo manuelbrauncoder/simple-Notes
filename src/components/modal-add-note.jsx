@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
@@ -9,6 +9,13 @@ function ModalAddNote(props) {
     const [noteContent, setNoteContent] = useState('');
     const [error, setError] = useState('');
 
+    useEffect(() => {
+        if (props.noteToEdit !== null) {
+            setNoteTitle(props.noteToEdit.title);
+            setNoteContent(props.noteToEdit.content);
+        }
+    }, [props.noteToEdit])
+
     const clearInput = () => { // Funktionen werden als Variable mit arrow function angegeben
         setNoteTitle('');
         setNoteContent('');
@@ -18,11 +25,16 @@ function ModalAddNote(props) {
     const saveNote = (e) => {
         e.preventDefault();
         if (noteTitle.trim() && noteContent.trim()) {
-            console.log('Title:', noteTitle);
-            console.log('Content:', noteContent);
-            props.onSave(noteTitle, noteContent);
-            clearInput();
-            props.onHide();
+            if (props.indexToEdit !== null) {
+                props.onEdit(noteTitle, noteContent, props.indexToEdit)
+                clearInput();
+                props.onHide();
+            } else {
+                props.onSave(noteTitle, noteContent); // speichert die note mit der funktion aus der parent component
+                clearInput();
+                props.onHide(); // schließt das modal mit der fn aus der parent
+            }
+
         } else {
             setError('Title and Content are required.')
         }
@@ -30,7 +42,12 @@ function ModalAddNote(props) {
     return (
         <Modal
             show={props.show}
-            onHide={props.onHide}
+            onHide={() => {
+                console.log('close');
+                clearInput();
+                props.clearEditCache();  // Leert den Cache
+                props.onHide();   // Schließt das Modal
+              }}
             size="lg"
             aria-labelledby="contained-modal-title-vcenter"
             centered
@@ -60,7 +77,7 @@ function ModalAddNote(props) {
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button onClick={() => { clearInput(); props.onHide(); }}>Close</Button>
+                <Button onClick={() => { clearInput(); props.onHide(); props.clearEditCache(); }}>Close</Button>
             </Modal.Footer>
         </Modal>
     );
